@@ -269,7 +269,10 @@ Everything lives in `.skills/`. Each skill is a markdown file the agent reads wh
 | `codex-history-ingest`  | Mine your `~/.codex` sessions and rollout logs    | `/codex-history-ingest`  |
 | `hermes-history-ingest` | Mine your `~/.hermes` memories and sessions       | `/hermes-history-ingest` |
 | `openclaw-history-ingest` | Mine your `~/.openclaw` MEMORY.md and sessions  | `/openclaw-history-ingest` |
+| `copilot-history-ingest` | Mine your `~/.copilot` CLI session history       | `/copilot-history-ingest` |
 | `data-ingest`           | Ingest any text — chat exports, logs, transcripts | `/data-ingest`           |
+| `ingest-url`            | Fetch and ingest a URL directly into the wiki     | `/ingest-url <url>`      |
+| `obsidian-wiki-ingest`  | Project-scoped automation wrapper for wiki-ingest | `/obsidian-wiki-ingest`  |
 | `wiki-status`           | Show what's ingested, what's pending, the delta   | `/wiki-status`           |
 | `wiki-rebuild`          | Archive, rebuild from scratch, or restore         | `/wiki-rebuild`          |
 | `wiki-query`            | Answer questions from the wiki                    | `/wiki-query`            |
@@ -283,6 +286,11 @@ Everything lives in `.skills/`. Each skill is a markdown file the agent reads wh
 | `wiki-research`         | Autonomous multi-round web research, self-filed   | `/wiki-research [topic]` |
 | `wiki-dashboard`        | Create dynamic Obsidian Bases dashboard views     | `/wiki-dashboard`        |
 | `wiki-synthesize`       | Discover and fill synthesis gaps across concepts  | `/wiki-synthesize`       |
+| `wiki-agent`            | Query-driven ingest from a specific agent's history | `/wiki-claude [topic]`, `/wiki-codex [topic]`, etc. |
+| `memory-bridge`         | Browse and diff knowledge by which AI tool wrote it | `/memory-bridge`         |
+| `daily-update`          | Daily maintenance cycle — freshness, index, hot cache | `/daily-update`        |
+| `impl-validator`        | Validate an implementation against its stated goal | `/impl-validator`       |
+| `graph-colorize`        | Color-code the Obsidian graph by tag/category/visibility | `/graph-colorize`   |
 | `skill-creator`         | Create new skills                                 | `/skill-creator`         |
 
 > **Note:** Slash commands (`/skill-name`) work in Claude Code, Cursor, and Windsurf. In other agents, just describe what you want and the agent will find the right skill.
