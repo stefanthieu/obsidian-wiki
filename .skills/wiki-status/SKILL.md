@@ -169,21 +169,71 @@ Present a clear summary:
 - **Recommendation:** Append (delta is small relative to total)
 ```
 
-## Step 4: Recommend Action
+## Step 4: What to Do Next
 
-Based on the delta, recommend one of:
+Replace the old single-line Recommendation with a ranked **What to Do Next** section. Gather these signals before rendering:
 
-| Situation | Recommendation |
-|---|---|
-| Delta is small (<20% of total) | **Append** — just ingest the new/modified sources |
-| Delta is large (>50% of total) | **Rebuild** — archive and reprocess everything |
-| Many deleted sources | **Lint first** — check for stale pages, then decide |
-| First time / empty vault | **Full ingest** — process everything |
-| User just wants to see status | **No action** — just report |
+### 4a: Gather signals
 
-Tell the user:
-- "You have X new sources and Y modified sources. I'd recommend [append/rebuild]."
-- "Want me to [ingest the delta / rebuild from scratch / just look at a specific project]?"
+1. **`_raw/` files** — list every file in `$OBSIDIAN_VAULT_PATH/_raw/` that isn't a `.gitkeep`. Count and name them.
+
+2. **Stale core pages** — scan all vault `.md` files. A page is "stale" when its `updated` frontmatter field is ≥90 days before today's date AND it has ≥5 incoming wikilinks (i.e., it's "core" — other pages depend on it). List them by name + last-updated date.
+
+3. **Orphan pages** — pages with zero incoming wikilinks. To compute: glob all `.md` pages, extract every `[[wikilink]]`, count references to each page, collect pages with `incoming == 0`. Show up to 5 names; report total count.
+
+4. **Synthesis opportunities** — check `hot.md` for any recent `/wiki-synthesize` run summary. If the last synthesis run reported N opportunities, surface that count. If no synthesis has been run recently (not in `hot.md` or `log.md` within last 14 days), flag it as "synthesis scan overdue".
+
+5. **Source delta** — from Step 2: count of new + modified sources ready to ingest.
+
+6. **Lint issues** — check `log.md` for a recent `/wiki-lint` run (within last 30 days). If a recent run recorded broken links or missing frontmatter, surface the count. If no lint run appears in the log, flag "lint not run recently".
+
+### 4b: Rank and render
+
+Score each category and emit a ranked list, **capped at 6 items**. Always rank in this priority order (skip a category if its count is 0 or it has nothing to report):
+
+| Priority | Category | Trigger |
+|---|---|---|
+| 1 | `_raw/` files waiting | Any files present in `_raw/` |
+| 2 | Stale core pages | Any page: updated ≥90 days ago AND ≥5 incoming links |
+| 3 | Orphan pages | Any pages with zero incoming wikilinks |
+| 4 | Synthesis opportunities | N opportunities from last synthesize run, OR scan overdue |
+| 5 | New/modified sources | Count from delta in Step 2 |
+| 6 | Lint issues | Known issues from last lint run, OR lint overdue |
+
+Render as:
+
+```markdown
+## What to Do Next
+
+1. 📥  Ingest 3 files waiting in _raw/
+   → architecture-notes.md, meeting-2026-05-10.md, paper-draft.pdf
+   run: /wiki-ingest
+
+2. 🔄  Refresh 2 stale core pages (not updated in 90+ days)
+   → [[System Architecture]] (last updated 2026-02-10), [[API Design]] (2026-01-15)
+   run: open these pages and re-run /wiki-update
+
+3. 🔗  Link 7 orphan pages  →  run: /cross-linker
+   Disconnected: [[Redis Caching]], [[JWT Tokens]], +5 more
+
+4. 🧩  2 synthesis opportunities identified  →  run: /wiki-synthesize
+   [[Redis Caching]] × [[Session Management]] (co-occur in 8 pages)
+
+5. ✅  4 sources modified since last ingest  →  run: /wiki-ingest (append mode)
+
+6. 🩺  Lint not run in 30+ days — run: /wiki-lint
+```
+
+**Empty state:** If all categories have nothing to report (no `_raw/` files, no orphans, no stale pages, no synthesis opportunities, no new sources, no lint issues), output instead:
+
+```markdown
+## What to Do Next
+
+✅  Wiki is healthy — nothing urgent.
+    All sources up to date · no orphans · no stale core pages · no _raw/ files pending
+```
+
+**Overflow:** If more than 6 items would be shown, add a footer line: `_(N more items available — run /wiki-status --full to see all)_`. The `--full` flag is not yet implemented; this is forward-looking copy that sets expectations.
 
 ## Insights Mode
 
